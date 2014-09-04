@@ -36,46 +36,47 @@ extensions() -> [".tiff", ".tif" ].
 read_info(Fd) ->
     case scan_fd(Fd, fun collect_fun/3, #erl_image { type = ?MODULE }) of
         {ok, IMG} ->
-            Bps = erl_img:attribute(IMG, 'BitsPerSample'),
-            Xs  = erl_img:attribute(IMG,'ExtraSamples',[]),
-            Format =
-                case erl_img:attribute(IMG, 'PhotoMetricInterpretation') of
-                    [0] ->
-                        case Bps of
-                            [1] -> bw;
-                            [4] -> gray4;
-                            [8] -> gray8
-                        end;
-                    [1] ->
-                        case Bps of
-                            [1] -> bw;
-                            [4] -> gray4;
-                            [8] -> gray8
-                        end;
-                    [2] ->
-                        case Bps of
-                            [8,8,8] ->
-                                case Xs of
-                                    []  ->  r8g8b8;
-                                    [_] -> r8g8b8a8
-                                end;
-                            [8,8,8,8] ->
-                                r8g8b8a8
-                        end;
-                    [3] ->
-                        case Bps of
-                            [4] -> palette4;
-                            [8] -> palette8
-                        end
-                end,
-            {ok, IMG#erl_image { format = Format }};
+            % Bps = erl_img:attribute(IMG, 'BitsPerSample'),
+            % Xs  = erl_img:attribute(IMG,'ExtraSamples',[]),
+            % Format =
+            %     case erl_img:attribute(IMG, 'PhotoMetricInterpretation') of
+            %         [0] ->
+            %             case Bps of
+            %                 [1] -> bw;
+            %                 [4] -> gray4;
+            %                 [8] -> gray8
+            %             end;
+            %         [1] ->
+            %             case Bps of
+            %                 [1] -> bw;
+            %                 [4] -> gray4;
+            %                 [8] -> gray8
+            %             end;
+            %         [2] ->
+            %             case Bps of
+            %                 [8,8,8] ->
+            %                     case Xs of
+            %                         []  ->  r8g8b8;
+            %                         [_] -> r8g8b8a8
+            %                     end;
+            %                 [8,8,8,8] ->
+            %                     r8g8b8a8
+            %             end;
+            %         [3] ->
+            %             case Bps of
+            %                 [4] -> palette4;
+            %                 [8] -> palette8
+            %             end
+            %     end,
+            % {ok, IMG#erl_image { format = Format }};
+            {ok, IMG};
         Error ->
             Error
     end.
 
 
-write_info(_Fd, _IMG) ->
-    ok.
+% write_info(_Fd, _IMG) ->
+%     ok.
 
 read(Fd, IMG) ->
     read(Fd, IMG,
@@ -85,118 +86,124 @@ read(Fd, IMG) ->
          []).
 
 
-read(Fd,IMG, RowFun, St0) ->
-    SOffset       = erl_img:attribute(IMG, 'StripOffset'),
-    SCount        = erl_img:attribute(IMG, 'StripByteCounts'),
-    [Compression] = erl_img:attribute(IMG, 'Compression',[1]),
-    [Predict]     = erl_img:attribute(IMG, 'Predictor', [0]),
-    [FillOrder]   = erl_img:attribute(IMG, 'FillOrder', [1]),
-    {SampleOrder,Y0,Ys} = case erl_img:attribute(IMG, 'Orientation', [1]) of
-                              [1] -> {left_to_right, 0, 1};
-                              [2] -> {right_to_left, 0, 1};
-                              [3] -> {right_to_left, IMG#erl_image.height-1,-1};
-                              [4] -> {left_to_right, IMG#erl_image.height-1,-1}
-                        end,
-    BytesPerRow = (IMG#erl_image.depth div 8) * IMG#erl_image.width,
-    ?dbg("BytesPerRow = ~p\n", [BytesPerRow]),
-    IMG1 = IMG#erl_image { order = SampleOrder },
-    PIX = #erl_pixmap { width = IMG1#erl_image.width,
-                        height = IMG1#erl_image.height,
-                        format = IMG1#erl_image.format },
-    case read_strips(Fd,PIX,RowFun,St0,Y0,Ys,BytesPerRow,
-                     Compression, Predict, FillOrder,SOffset,SCount) of
-        {ok, PIX1} ->
-            {ok, IMG1#erl_image { pixmaps = [PIX1]}};
-        Error ->
-            Error
-    end.
+read(_Fd,IMG, _RowFun, _St0) ->
+    % SOffset       = erl_img:attribute(IMG, 'StripOffset'),
+    % SCount        = erl_img:attribute(IMG, 'StripByteCounts'),
+    % [Compression] = erl_img:attribute(IMG, 'Compression',[1]),
+    % [Predict]     = erl_img:attribute(IMG, 'Predictor', [0]),
+    % [FillOrder]   = erl_img:attribute(IMG, 'FillOrder', [1]),
+    % {SampleOrder,Y0,Ys} = case erl_img:attribute(IMG, 'Orientation', [1]) of
+    %                           [1] -> {left_to_right, 0, 1};
+    %                           [2] -> {right_to_left, 0, 1};
+    %                           [3] -> {right_to_left, IMG#erl_image.height-1,-1};
+    %                           [4] -> {left_to_right, IMG#erl_image.height-1,-1}
+    %                     end,
+    % BytesPerRow = (IMG#erl_image.depth div 8) * IMG#erl_image.width,
+    % ?dbg("BytesPerRow = ~p\n", [BytesPerRow]),
+    %IMG1 = IMG#erl_image { order = SampleOrder },
+    % PIX = #erl_pixmap { width = IMG1#erl_image.width,
+    %                     height = IMG1#erl_image.height,
+    %                     format = IMG1#erl_image.format },
+    % case read_strips(Fd,PIX,RowFun,St0,Y0,Ys,BytesPerRow,
+    %                  Compression, Predict, FillOrder,SOffset,SCount) of
+    %     {ok, _PIX1} ->
+    %         %{ok, IMG1#erl_image { pixmaps = [PIX1]}};
+    %         {ok, IMG1};
+    %     Error ->
+    %         Error
+    % end.
+    {ok, IMG}.
 
 
-read_strips(_Fd,PIX,_RowFun,St0,_Ri,_Rs,
-            _BytesPerRow,_Compression, _Predict, _Fill, [], []) ->
-    {ok, PIX#erl_pixmap { pixels = St0 }};
-read_strips(Fd,PIX,RowFun,St0,Ri,Rs,
-            BytesPerRow,Compression, Predict, Fill,
-            [Offs|SOffset], [Size|SCount]) ->
-    case file:pread(Fd,Offs,Size) of
-        {ok,Bin} ->
-            case Compression of
-                1 -> %% no compression
-                    {St1,Rj} = split_strip(PIX,Bin,BytesPerRow,
-                                           RowFun,St0,Ri,Rs),
-                    read_strips(Fd,PIX,RowFun,St1,Rj,Rs,BytesPerRow,
-                                Compression,Predict,Fill,SOffset,SCount);
+% read_strips(_Fd,PIX,_RowFun,St0,_Ri,_Rs,
+%             _BytesPerRow,_Compression, _Predict, _Fill, [], []) ->
+%     {ok, PIX#erl_pixmap { pixels = St0 }};
+% read_strips(Fd,PIX,RowFun,St0,Ri,Rs,
+%             BytesPerRow,Compression, Predict, Fill,
+%             [Offs|SOffset], [Size|SCount]) ->
+%     case file:pread(Fd,Offs,Size) of
+%         {ok,Bin} ->
+%             case Compression of
+%                 1 -> %% no compression
+%                     {St1,Rj} = split_strip(PIX,Bin,BytesPerRow,
+%                                            RowFun,St0,Ri,Rs),
+%                     read_strips(Fd,PIX,RowFun,St1,Rj,Rs,BytesPerRow,
+%                                 Compression,Predict,Fill,SOffset,SCount);
 
-                5 -> %% lzw compression
-                    Bin1 = lzw:decompress_tiff(Bin, 8, Fill),
-                    Bin2 = undo_differencing(Bin1, Predict,
-                                             PIX#erl_pixmap.format,
-                                             PIX#erl_pixmap.width),
-                    {St1,Rj} = split_strip(PIX,Bin2,BytesPerRow,
-                                           RowFun,St0,Ri,Rs),
-                    read_strips(Fd,PIX,RowFun,St1,Rj,Rs,BytesPerRow,
-                                Compression, Predict, Fill, SOffset, SCount);
+%                 5 -> %% lzw compression
+%                     Bin1 = lzw:decompress_tiff(Bin, 8, Fill),
+%                     Bin2 = undo_differencing(Bin1, Predict,
+%                                              PIX#erl_pixmap.format,
+%                                              PIX#erl_pixmap.width),
+%                     {St1,Rj} = split_strip(PIX,Bin2,BytesPerRow,
+%                                            RowFun,St0,Ri,Rs),
+%                     read_strips(Fd,PIX,RowFun,St1,Rj,Rs,BytesPerRow,
+%                                 Compression, Predict, Fill, SOffset, SCount);
 
-                32773 ->
-                    Bin1 = unpack_bits(Bin),
-                    {St1,Rj} = split_strip(PIX,Bin1,BytesPerRow,
-                                           RowFun,St0,Ri,Rs),
-                    read_strips(Fd,PIX,RowFun,St1,Rj,Rs,BytesPerRow,
-                                Compression, Predict, Fill, SOffset, SCount);
-                _ ->
-                    {error, {unknown_compression,Compression}}
-            end;
-        Error ->
-            Error
-    end.
-
-
-split_strip(PIX,Strip,RowWidth,RowFun,St0,Ri,Rs) ->
-    case Strip of
-        <<Row:RowWidth/binary, Tail/binary>> ->
-            St1 = RowFun(PIX,Row,Ri,St0),
-            split_strip(PIX,Tail,RowWidth,RowFun,St1,Ri+Rs,Rs);
-        _ ->
-            {St0,Ri}
-    end.
+%                 32773 ->
+%                     Bin1 = unpack_bits(Bin),
+%                     {St1,Rj} = split_strip(PIX,Bin1,BytesPerRow,
+%                                            RowFun,St0,Ri,Rs),
+%                     read_strips(Fd,PIX,RowFun,St1,Rj,Rs,BytesPerRow,
+%                                 Compression, Predict, Fill, SOffset, SCount);
+%                 _ ->
+%                     {error, {unknown_compression,Compression}}
+%             end;
+%         Error ->
+%             Error
+%     end.
 
 
-write(_Fd,_IMG) ->
-    ok.
+% split_strip(PIX,Strip,RowWidth,RowFun,St0,Ri,Rs) ->
+%     case Strip of
+%         <<Row:RowWidth/binary, Tail/binary>> ->
+%             St1 = RowFun(PIX,Row,Ri,St0),
+%             split_strip(PIX,Tail,RowWidth,RowFun,St1,Ri+Rs,Rs);
+%         _ ->
+%             {St0,Ri}
+%     end.
+
+
+% write(_Fd,_IMG) ->
+%     ok.
 
 %% Image info collector functions
 collect_fun(_Fd, T, St) ->
     Key = decode_tag(T#tiff_entry.tag),
     Value = T#tiff_entry.value,
-    As = [{Key,Value} | St#erl_image.attributes],
+    %As = [{Key,Value} | St#erl_image.attributes],
     case Key of
         'ImageWidth' ->
             Width = hd(Value),
-            St#erl_image { width = Width, attributes = As };
+            St#erl_image { width = Width%, 
+                %attributes = As 
+                };
         'ImageLength' ->
             Length = hd(Value),
-            St#erl_image { height = Length, attributes = As };
-        'BitsPerSample' ->
-            St#erl_image { depth = lists:sum(Value), attributes = As };
-        'ImageDescription' ->
-            St#erl_image { comment = Value, attributes = As };
-        'DateTime' ->
-            V = hd(Value),
-            case string:tokens(V, ": ") of
-                [YYYY,MM,DD,H,M,S] ->
-                    DateTime = {{list_to_integer(YYYY),
-                                 list_to_integer(MM),
-                                 list_to_integer(DD)},
-                                {list_to_integer(H),
-                                 list_to_integer(M),
-                                 list_to_integer(S)}},
-                    St#erl_image { itime = DateTime, attributes = As };
-                _ ->
-                    St#erl_image { attributes = As }
-            end;
-
+            St#erl_image { height = Length%, 
+                        %attributes = As 
+                        };
+        % 'BitsPerSample' ->
+        %     St#erl_image { depth = lists:sum(Value), attributes = As };
+        % 'ImageDescription' ->
+        %     St#erl_image { comment = Value, attributes = As };
+        % 'DateTime' ->
+        %     V = hd(Value),
+        %     case string:tokens(V, ": ") of
+        %         [YYYY,MM,DD,H,M,S] ->
+        %             DateTime = {{list_to_integer(YYYY),
+        %                          list_to_integer(MM),
+        %                          list_to_integer(DD)},
+        %                         {list_to_integer(H),
+        %                          list_to_integer(M),
+        %                          list_to_integer(S)}},
+        %             St#erl_image { itime = DateTime, attributes = As };
+        %         _ ->
+        %             St#erl_image { attributes = As }
+        %     end;
         _ ->
-            St#erl_image { attributes = As }
+            St#erl_image { %attributes = As 
+            }
     end.
 
 
@@ -358,7 +365,7 @@ decode_tag(Tag) ->
         ?SubfileType -> 'SubfileType';
         ?ImageWidth -> 'ImageWidth';
         ?ImageLength -> 'ImageLength';
-        ?BitsPerSample -> 'BitsPerSample';
+        %?BitsPerSample -> 'BitsPerSample';
         ?Compression -> 'Compression';
         ?PhotoMetricInterpretation -> 'PhotoMetricInterpretation';
         ?Threshholding -> 'Threshholding';
@@ -559,64 +566,80 @@ decode_strings([], String, Acc) ->
 
 
 
-undo_differencing(Data,2,r8g8b8a8,Width) ->
-    undo_differencing4(Data, Width);
-undo_differencing(Data,2,r8g8b8,Width) ->
-    undo_differencing3(Data, Width);
-undo_differencing(Data,_,_,_) ->
-    Data.
+% undo_differencing(Data,2,r8g8b8a8,Width) ->
+%     undo_differencing4(Data, Width);
+% undo_differencing(Data,2,r8g8b8,Width) ->
+%     undo_differencing3(Data, Width);
+% undo_differencing(Data,_,_,_) ->
+%     Data.
 
-undo_differencing4(Data, Width) ->
-    if is_binary(Data) ->
-            undo_differencing4(0, Width, binary_to_list(Data),0,0,0,0, []);
-       is_list(Data) ->
-            undo_differencing4(0, Width, Data, 0,0,0,0, [])
-    end.
-
-
-undo_differencing4(W, W, Rest, _,_,_,_,Ack) ->
-    undo_differencing4(0,W, Rest, 0,0,0,0,Ack);
-undo_differencing4(C, W, [R,G,B,A|Rest], AR,AG,AB,AA, Ack) ->
-    %% io:format("undo ~p ~n", [[{R,G,B,A}, {AR,AG,AB,AA}]]),
-    RR = (R + AR) rem 256,
-    RG = (G + AG) rem 256,
-    RB = (B + AB) rem 256,
-    RA = (A + AA) rem 256,
-    undo_differencing4(C+1, W, Rest, RR,RG,RB,RA, [RA,RB,RG,RR|Ack]);
-undo_differencing4(_, _, [], _,_,_,_, Ack) ->
-    list_to_binary(reverse(Ack)).
+% undo_differencing4(Data, Width) ->
+%     if is_binary(Data) ->
+%             undo_differencing4(0, Width, binary_to_list(Data),0,0,0,0, []);
+%        is_list(Data) ->
+%             undo_differencing4(0, Width, Data, 0,0,0,0, [])
+%     end.
 
 
-undo_differencing3(Data, Width) ->
-    if is_binary(Data) ->
-            undo_differencing3(0, Width, binary_to_list(Data),0,0,0, []);
-       is_list(Data) ->
-            undo_differencing3(0, Width, Data, 0, 0, 0, [])
-    end.
-
-undo_differencing3(W, W, Rest, _,_,_, Ack) ->
-    undo_differencing3(0,W, Rest, 0,0,0, Ack);
-undo_differencing3(C, W, [R,G,B|Rest], AR,AG,AB, Ack) ->
-    RR = (R + AR) rem 256,
-    RG = (G + AG) rem 256,
-    RB = (B + AB) rem 256,
-    undo_differencing3(C+1, W, Rest, RR,RG,RB, [RB,RG,RR|Ack]);
-undo_differencing3(_, _, [], _,_,_, Ack) ->
-    list_to_binary(reverse(Ack)).
+% undo_differencing4(W, W, Rest, _,_,_,_,Ack) ->
+%     undo_differencing4(0,W, Rest, 0,0,0,0,Ack);
+% undo_differencing4(C, W, [R,G,B,A|Rest], AR,AG,AB,AA, Ack) ->
+%     %% io:format("undo ~p ~n", [[{R,G,B,A}, {AR,AG,AB,AA}]]),
+%     RR = (R + AR) rem 256,
+%     RG = (G + AG) rem 256,
+%     RB = (B + AB) rem 256,
+%     RA = (A + AA) rem 256,
+%     undo_differencing4(C+1, W, Rest, RR,RG,RB,RA, [RA,RB,RG,RR|Ack]);
+% undo_differencing4(_, _, [], _,_,_,_, Ack) ->
+%     list_to_binary(reverse(Ack)).
 
 
-unpack_bits(Bin) ->
-    unpack_bits(Bin, []).
+% undo_differencing3(Data, Width) ->
+%     if is_binary(Data) ->
+%             undo_differencing3(0, Width, binary_to_list(Data),0,0,0, []);
+%        is_list(Data) ->
+%             undo_differencing3(0, Width, Data, 0, 0, 0, [])
+%     end.
 
-unpack_bits(<<>>, Acc) ->
-    list_to_binary(lists:reverse(Acc));
-unpack_bits(<<128:8/signed,Tail/binary>>, Acc) ->
-    unpack_bits(Tail, Acc);
-unpack_bits(<<Code:8/signed,Tail/binary>>, Acc) when Code >= 0 ->
-    Count = Code + 1,
-    <<Bin1:Count/binary, Tail1/binary>> = Tail,
-    unpack_bits(Tail1, [Bin1|Acc]);
-unpack_bits(<<Code:8/signed,Tail/binary>>, Acc) ->
-    Count = -Code + 1,
-    <<Re:8, Tail1/binary>> = Tail,
-    unpack_bits(Tail1, [list_to_binary(lists:duplicate(Count, Re))|Acc]).
+% undo_differencing3(W, W, Rest, _,_,_, Ack) ->
+%     undo_differencing3(0,W, Rest, 0,0,0, Ack);
+% undo_differencing3(C, W, [R,G,B|Rest], AR,AG,AB, Ack) ->
+%     RR = (R + AR) rem 256,
+%     RG = (G + AG) rem 256,
+%     RB = (B + AB) rem 256,
+%     undo_differencing3(C+1, W, Rest, RR,RG,RB, [RB,RG,RR|Ack]);
+% undo_differencing3(_, _, [], _,_,_, Ack) ->
+%     list_to_binary(reverse(Ack)).
+
+
+% unpack_bits(Bin) ->
+%     unpack_bits(Bin, []).
+
+% unpack_bits(<<>>, Acc) ->
+%     list_to_binary(lists:reverse(Acc));
+% unpack_bits(<<128:8/signed,Tail/binary>>, Acc) ->
+%     unpack_bits(Tail, Acc);
+% unpack_bits(<<Code:8/signed,Tail/binary>>, Acc) when Code >= 0 ->
+%     Count = Code + 1,
+%     <<Bin1:Count/binary, Tail1/binary>> = Tail,
+%     unpack_bits(Tail1, [Bin1|Acc]);
+% unpack_bits(<<Code:8/signed,Tail/binary>>, Acc) ->
+%     Count = -Code + 1,
+%     <<Re:8, Tail1/binary>> = Tail,
+%     unpack_bits(Tail1, [list_to_binary(lists:duplicate(Count, Re))|Acc]).
+
+
+
+
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+
+get_dimensions_tiff_test() ->
+    {ok, Bytes} = file:read_file("../test_images/1.tiff"),
+    {ok, Image} = erl_img:load(Bytes),
+    ?assertEqual(640, Image#erl_image.width),
+    ?assertEqual(400, Image#erl_image.height).
+
+
+-endif.

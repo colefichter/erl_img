@@ -43,17 +43,17 @@ extensions() -> [".bmp" ].
 read_info(Fd) ->
     case file:read(Fd, 54) of
         {ok, << ?BMP_HEADER(_Size,_Offset),
-                ?BMP_INFO(_,Width,Height,Planes,_BitCount,
-                          Compression,_,_,_,_,_) >> } ->
+                ?BMP_INFO(_,Width,Height,_Planes,_BitCount,
+                          _Compression,_,_,_,_,_) >> } ->
             {ok, #erl_image  { type      = ?MODULE,
                              width     = Width,
-                             height    = Height,
-                             depth     = Planes,
-                             format    = b8g8r8,
-                             bytes_pp  = 3,
-                             alignment = 4,
-                             order = left_to_right,
-                             attributes = [{'Compression',Compression}]
+                             height    = Height%,
+                             %depth     = Planes,
+                             %format    = b8g8r8,
+                             %bytes_pp  = 3,
+                             %alignment = 4,
+                             %order = left_to_right,
+                             %attributes = [{'Compression',Compression}]
                             }};
         {ok, _} ->
             {error, bad_magic};
@@ -62,16 +62,18 @@ read_info(Fd) ->
     end.
 
 
-write_info(_Fd, _IMG) ->
-    ok.
+% write_info(_Fd, _IMG) ->
+%     ok.
 
-read(Fd, IMG, RowFun, St0) ->
-    file:position(Fd, 54),
-    case read_pixels(Fd, IMG, RowFun, St0) of
-        {ok,PIX} ->
-            {ok, IMG#erl_image { pixmaps = [PIX] }};
-        Error -> Error
-    end.
+read(_Fd, IMG, _RowFun, _St0) ->
+    %file:position(Fd, 54),
+    % case read_pixels(Fd, IMG, RowFun, St0) of
+    %     {ok,PIX} ->
+    %         %{ok, IMG#erl_image { pixmaps = [PIX] }};
+    %         {ok, IMG};
+    %     Error -> Error
+    % end.
+    {ok, IMG}.
 
 %% load image
 read(Fd, IMG) ->
@@ -81,27 +83,15 @@ read(Fd, IMG) ->
                  [{Ri,Row}|St] end,
          []).
 
-%% save image
-write(_Fd, _IMG) ->
-    ok.
 
-%% Read all rows
-read_pixels(Fd, IMG, RowFun, St0) ->
-    Width = IMG#erl_image.width,
-    Height = IMG#erl_image.height,
-    RowLength =  Width*3 + ?PAD_Len(Width*3, 4),
-    PIX = #erl_pixmap { width = Width, height = Height,
-                        format = IMG#erl_image.format },
-    read_pixels(Fd, PIX, 0, Height, RowLength, RowFun, St0).
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+
+get_dimensions_bmp_test() ->
+    {ok, Bytes} = file:read_file("../test_images/cat.bmp"),
+    {ok, Image} = erl_img:load(Bytes),
+    ?assertEqual(500, Image#erl_image.width),
+    ?assertEqual(330, Image#erl_image.height).
 
 
-read_pixels(_Fd, PIX, NRows, NRows, _BytesPerRow, _RowFun, St) ->
-    {ok,PIX#erl_pixmap { pixels = St }};
-read_pixels(Fd, PIX, Ri, NRows, BytesPerRow, RowFun, St) ->
-    case file:read(Fd, BytesPerRow) of
-        {ok,Row} ->
-            St1 = RowFun(PIX, Row, Ri, St),
-            read_pixels(Fd, PIX, Ri+1, NRows, BytesPerRow, RowFun, St1);
-        Error ->
-            Error
-    end.
+-endif.

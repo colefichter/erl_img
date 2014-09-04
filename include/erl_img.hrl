@@ -70,14 +70,14 @@
                         %%  b8g8r8 r8g8b8 r8g8b8a8
           width,        %% Image width
           height,       %% Image height
-          depth,        %% Image depth
-          bytes_pp = 3, %% bytes per pixel
-          alignment = 1,
-          attributes = [], %% list of attributes [{atom(Key),term(Value)}]
-          order,        %% sample order left_to_right or right_to_left
-          palette,      %% list [{R,G,B}]
-          alpha_table,  %% list corresponding to palette indexes
-          pixmaps = []  %% [#erl_pixmap]
+          %depth,        %% Image depth
+          %bytes_pp = 3, %% bytes per pixel
+          %alignment = 1,
+          attributes = [],%, %% list of attributes [{atom(Key),term(Value)}]
+          order%,        %% sample order left_to_right or right_to_left
+          %palette,      %% list [{R,G,B}]
+          %lpha_table,  %% list corresponding to palette indexes
+          %pixmaps = []  %% [#erl_pixmap]
          }).
 
 -endif.

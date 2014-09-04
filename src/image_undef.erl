@@ -17,8 +17,8 @@ extensions() -> [].
 read_info(_Fd) ->
     {error, bad_magic}.
 
-write_info(_Fd, _IMG) ->
-    {error, bad_image}.
+% write_info(_Fd, _IMG) ->
+%     {error, bad_image}.
 
 read(_Fd,_IMG) ->
     {error, bad_image}.
@@ -26,7 +26,7 @@ read(_Fd,_IMG) ->
 read(_Fd,_IMG,_PixFun,_PixSt) ->
     {error, bad_image}.
 
-write(_Fd,_IMG) ->
-    {error, bad_image}.
+% write(_Fd,_IMG) ->
+%     {error, bad_image}.
 
 
